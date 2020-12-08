@@ -1,0 +1,78 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'idea'
+
+group = 'com.tanbirsohail.spark'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.scala-lang:scala-library:" + scalaVersion
+    compile "org.scala-lang:scala-reflect:" + scalaVersion
+    compile "org.scala-lang:scala-compiler:" + scalaVersion
+
+    compile "org.apache.spark:spark-sql_2.11:" + sparkVersion
+    compile "org.apache.spark:spark-core_2.11:" + sparkVersion
+
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
+}
+
+// test {
+//    useJUnitPlatform()
+// }
+
+task run(type: JavaExec, dependsOn: classes) {
+    main = mainClassFile
+    classpath sourceSets.main.runtimeClasspath
+    classpath configurations.runtime
+}
+
+jar {
+    classifier = 'all'
+    manifest {
+        attributes 'Implementation-Title': title,
+                'Implementation-Version': version,
+                'Main-Class': mainClassFile
+    }
+    include { sourceSets.main.output.classesDir }
+    zip64 true
+}
+
+shadowJar {
+    classifier = 'shadow'
+    zip64 = true // essential when there are a large number of entries for the jar
+    append 'reference.conf'
+    dependencies {
+
+    }
+}
+
+idea {
+    module {
+        // IntelliJ does not know about the standard idiom of provided as used in managing
+        // uber/shaded jar dependencies. Make it so!
+        scopes.PROVIDED.plus += [configurations.provided]
+    }
+}
