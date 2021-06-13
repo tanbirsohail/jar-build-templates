@@ -37,11 +37,17 @@ dependencies {
     compile "org.apache.spark:spark-core_2.11:" + sparkVersion
 
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.3'
+    testImplementation group: 'org.scalatest', name: 'scalatest_2.11', version: '3.2.1'
+
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.3")
+
 }
 
-// test {
-//    useJUnitPlatform()
-// }
+ test {
+    useJUnitPlatform()
+ }
 
 task run(type: JavaExec, dependsOn: classes) {
     main = mainClassFile
